@@ -1,0 +1,26 @@
+# /lib/systemd/system/sidekiq.service
+[Unit]
+Description=sidekiq
+After=syslog.target network.target
+
+[Service]
+Environment="JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+Type=simple
+WorkingDirectory=/var/www/mpa-digital-bunkering/current
+ExecStart=/home/ubuntu/.rbenv/shims/bundle exec sidekiq -e staging -C config/sidekiq.yml
+ExecReload=/usr/bin/kill -TSTP $MAINPID
+ExecStartPost=/bin/sh -c '/bin/echo $MAINPID > /var/www/mpa-digital-bunkering/shared/tmp/pids/sidekiq.pid'
+ExecStopPost=/bin/sh -c 'rm /var/www/mpa-digital-bunkering/shared/tmp/pids/sidekiq.pid'
+
+User=ubuntu
+#Group=sudo
+#UMask=0002
+
+# if we crash, restart
+RestartSec=1
+#Restart=on-failure
+#Restart=always
+
+# output goes to /var/log/syslog
+StandardOutput=/var/www/mpa-digital-bunkering/shared/log/sidekiq.log
+StandardError=/var/www/mpa-digital-bunkering/shared/log/sidekiq.log
